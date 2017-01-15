@@ -10,72 +10,105 @@
 begin     "\\begin{texsci}"
 end       "\\end{texsci}"
 blankline "\\BlankLine"
-id        [a-zA-Z_][a-zA-Z0-9_]*
-letter    [a-zA-Z]
-number    [0-9]+
-space     [\t\n ]+
-
-mbox         "\\mbox"
-left         "\\leftarrow"
+const        "\\Constant"
 input        "\\Input"
 output       "\\Output"
-integer      "\\Integer"
-boolean      "\\Boolean"
-const        "\\Constant"
-real         "\\Real"
-complex      "\\Complex"
 global       "\\Global"
 local        "\\Local"
+mbox         "\\mbox"
+integer      "\\Integer"
+boolean      "\\Boolean"
+empty        "\\emptyset"
+left         "\\leftarrow"
+egal         "="
 cin          "\\in"
-cwhile       "\\While"
-cfor         "\\For"
-cif          "\\If"
-ceif         "\\eIf"
-endInst      "\\;"
 multOp       "\\times"
 printint     "\\printInt"
 printtext    "\\printText"
-
+id        [a-zA-Z_][a-zA-Z0-9_]*
+number    -?[0-9]+
+bool      "\\true"|"\\false"
+dollar       "$"
+endInst      "\\;"
 string \"(\\.|[^"])*\"
+
 
 %%
 
 {begin}             { BEGIN(texsci);   // Start TexSci scanning mode
                       return TEXSCI_BEGIN;
                     }
+
 <texsci>{end}       { BEGIN(INITIAL); // Reset to default scanning mode
                       return TEXSCI_END;
 		    }
+
+<texsci>{blankline} { return BLANKLINE; }
+
+<texsci>[{}]        { return yytext[0]; }
+
+<texsci>[()]        { return yytext[0]; }
+
+[\n]                { }
+
+[ ]                 { }
+
+<texsci>{const}     {return CONST;}
+
+<texsci>{input}     {return INPUT;}
+
+<texsci>{output}     {return OUTPUT;}
+
+<texsci>{global}     {return GLOBAL;}
+
+<texsci>{local}     {return LOCAL;}
+
+<texsci>{integer}     {return INTEGER;}
+
+<texsci>{boolean}     {return BOOLEAN;}
+
+<texsci>{empty}  {return EMPTY; }
+
+<texsci>{left}     {return LEFT;}
+
+<texsci>{egal}  {return EQUAL; }
+
+<texsci>{cin}      {return CIN;}
+
+<texsci>{dollar}         { return yytext[0]; }
+
+<texsci>{endInst}      {return ENDINST;}
+
+<texsci>[+]         { return PLUS; }
+
+<texsci>[-]         { return MIN; }
+
+<texsci>{multOp}      {return MULTOP;}
+
+<texsci>{mbox}      {return MBOX;}
+
+<texsci>{printint} { return PRINTINT;  }
+
+<texsci>{printtext} { return PRINTTEXT;  }
+
+<texsci>[,]         { return yytext[0]; }
+
 <texsci>{id}        { yylval.name = strdup(yytext);
                       return ID;
                     }
-<texsci>{blankline} { return BLANKLINE; }
-<texsci>[{}]        { return yytext[0]; }
-<texsci>[()]        { return yytext[0]; }
-[\n]                { }
+
+<texsci>{number}    { yylval.val = strdup(yytext);
+                            return INT; }
+
+<texsci>{bool}      { return BOOL; }
+
+<texsci>{string} { yylval.str = strdup(yytext);
+                  return STR;  }
+
+<texsci>.           { fprintf(stderr, "line %d: lexical error [%s] \n",yylineno,yytext); exit(1);}
+
 .                   { }
 
-<texsci>{mbox}      {return MBOX;}
-<texsci>{left}     {return LEFT;}
-<texsci>{input}     {return INPUT;}
-<texsci>{output}     {return OUTPUT;}
-<texsci>{integer}     {return INTEGER;}
-<texsci>{boolean}     {return BOOLEAN;}
-<texsci>{const}     {return CONST;}
-<texsci>{real}     {return REAL;}
-<texsci>{complex}     {return COMPLEX;}
-<texsci>{global}     {return GLOBAL;}
-<texsci>{local}     {return LOCAL;}
-<texsci>{cin}      {return CIN;}
-<texsci>{cwhile}     {return CWHILE;}
-<texsci>{cfor}      {return CFOR;}
-<texsci>{cif}      {return CIF;}
-<texsci>{ceif}      {return CEIF;}
-<texsci>{endInst}      {return ENDINST;}
-<texsci>{multOp}      {return MULTOP;}
-<texsci>{printint} { return PRINTINT;  }
-<texsci>{printtext} { return PRINTTEXT;  }
-<texsci>{string} { return STR;  }
 %%
 
 /**
