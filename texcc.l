@@ -51,6 +51,7 @@ string \"(\\.|[^"])*\"
                     }
 <texsci>{blankline} { return BLANKLINE; }
 <texsci>[{}]        { return yytext[0]; }
+<texsci>[()]        { return yytext[0]; }
 [\n]                { }
 .                   { }
 
