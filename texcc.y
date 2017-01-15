@@ -53,11 +53,11 @@ liste_instructions:
 instruction:
      '$' ID LEFT expression '$' ENDINST
   | '$' MBOX '{' print '}' '$' ENDINST
-  |
+  | {printf("je bloque la\n");}
   ;
 
 print:
-     PRINTINT '(' '$' ID '$' ')'
+    PRINTINT '(' '$' ID '$' ')'
   | PRINTTEXT '(' '$'  STR  '$' ')'
   |
   ;
