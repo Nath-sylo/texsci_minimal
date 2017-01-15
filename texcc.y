@@ -1,14 +1,17 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
+  #include <string.h>
   #define TEXCC_ERROR_GENERAL 4
 
-  void yyerror(char*);
+  void yyerror(const char*);
 
   // Functions and global variables provided by Lex.
   int yylex();
   void texcc_lexer_free();
   extern FILE* yyin;
+  extern int yylineno;
+
 %}
 
 %union {
@@ -51,7 +54,7 @@ liste_instructions:
   ;
 
 instruction:
-     '$' ID LEFT expression '$' ENDINST
+    '$' ID LEFT expression '$' ENDINST
   | '$' MBOX '{' print '}' '$' ENDINST
   | {printf("je bloque la\n");}
   ;
@@ -95,7 +98,7 @@ list_const:
   
 //TODO rajouter les instructions d'ajout dans la table des symboles
 const:
-    ID EQUAL INT CIN type
+    ID '=' INT CIN type
   ;
 
 inputs:
@@ -169,6 +172,16 @@ type:
   ;
 
 %%
+
+void yyerror(const char * s)
+{
+  char error[] = "syntax error";
+  fprintf(stderr, "line %d: %s \n", yylineno, s);
+  if(strcmp (error,s) == 0)
+    exit(2);
+  else
+    exit(4);
+}
 
 int main(int argc, char* argv[]) {
   if (argc == 2) {

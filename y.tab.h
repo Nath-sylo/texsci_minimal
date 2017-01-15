@@ -110,7 +110,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 14 "texcc.y"
+#line 17 "texcc.y"
 {
   char* name;
   char* val;

@@ -5,6 +5,7 @@
 %}
 
 %s texsci
+%option yylineno
 
 begin     "\\begin{texsci}"
 end       "\\end{texsci}"
@@ -23,7 +24,6 @@ boolean      "\\Boolean"
 const        "\\Constant"
 real         "\\Real"
 complex      "\\Complex"
-equal        "="
 global       "\\Global"
 local        "\\Local"
 cin          "\\in"
@@ -31,7 +31,7 @@ cwhile       "\\While"
 cfor         "\\For"
 cif          "\\If"
 ceif         "\\eIf"
-endInst      "\\;\n"
+endInst      "\\;"
 multOp       "\\times"
 printint     "\\printInt"
 printtext    "\\printText"
@@ -63,7 +63,6 @@ string \"(\\.|[^"])*\"
 <texsci>{const}     {return CONST;}
 <texsci>{real}     {return REAL;}
 <texsci>{complex}     {return COMPLEX;}
-<texsci>{equal}     {return EQUAL;}
 <texsci>{global}     {return GLOBAL;}
 <texsci>{local}     {return LOCAL;}
 <texsci>{cin}      {return CIN;}
