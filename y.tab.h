@@ -65,11 +65,7 @@
      GLOBAL = 281,
      LOCAL = 282,
      CIN = 283,
-     CWHILE = 284,
-     CFOR = 285,
-     CIF = 286,
-     CEIF = 287,
-     ENDINST = 288
+     ENDINST = 284
    };
 #endif
 /* Tokens.  */
@@ -99,11 +95,7 @@
 #define GLOBAL 281
 #define LOCAL 282
 #define CIN 283
-#define CWHILE 284
-#define CFOR 285
-#define CIF 286
-#define CEIF 287
-#define ENDINST 288
+#define ENDINST 284
 
 
 
@@ -117,7 +109,7 @@ typedef union YYSTYPE
   char* str;
 }
 /* Line 1529 of yacc.c.  */
-#line 121 "y.tab.h"
+#line 113 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

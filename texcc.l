@@ -23,8 +23,8 @@ left         "\\leftarrow"
 egal         "="
 cin          "\\in"
 multOp       "\\times"
-printint     "\\printInt"
-printtext    "\\printText"
+printint     "printInt"
+printtext    "printText"
 id        [a-zA-Z_][a-zA-Z0-9_]*
 number    -?[0-9]+
 bool      "\\true"|"\\false"
@@ -93,17 +93,16 @@ string \"(\\.|[^"])*\"
 
 <texsci>[,]         { return yytext[0]; }
 
-<texsci>{id}        { yylval.name = strdup(yytext);
-                      return ID;
+<texsci>{id}        {  yylval.name = strdup(yytext);
+                       return ID;
                     }
 
-<texsci>{number}    { yylval.val = strdup(yytext);
-                            return INT; }
+<texsci>{number}    {   yylval.val = strdup(yytext);
+                        return INT; }
 
 <texsci>{bool}      { return BOOL; }
 
-<texsci>{string} { yylval.str = strdup(yytext);
-                  return STR;  }
+<texsci>{string} { return STR;  }
 
 <texsci>.           { fprintf(stderr, "line %d: lexical error [%s] \n",yylineno,yytext); exit(1);}
 
