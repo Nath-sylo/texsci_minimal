@@ -65,3 +65,9 @@ char* print_symbol(struct symbol * sym);
 void print_quad(FILE * output, struct quad * quadre);
 
 void print_code(FILE * output, struct code * code);
+
+void mips_print(FILE* output, char* str, struct symtable * table);
+
+void mips_int(FILE* output,char* str);
+
+void mips_int_const(FILE* output,char* str, char* value);

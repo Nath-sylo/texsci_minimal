@@ -21,6 +21,9 @@
   char* name;
   char* val;
   char* str;
+  struct {
+      struct symbol * ptr;
+  } exprval;
 }
 
 %left MULTOP
@@ -33,6 +36,8 @@
 %token MBOX LEFT INPUT OUTPUT CONST INTEGER BOOLEAN
 %token COMPLEX EQUAL GLOBAL LOCAL
 %token CIN ENDINST
+
+%type <exprval> expression sous_expression
 
 %start algorithm_list
 
@@ -57,31 +62,75 @@ liste_instructions:
   ;
 
 instruction:
-    '$' ID LEFT expression '$' ENDINST
+           '$' ID LEFT expression '$' ENDINST  {
+            struct symbol  * id = symtable_get(table,$2);
+            if(id==NULL){
+                fprintf(stderr, "line %d: semantic error \n", yylineno);
+                exit(3);
+            }
+            gencode(code,COPY,id,$4.ptr,NULL);
+    }
   | '$' MBOX '{' print '}' '$' ENDINST
-  | {printf("je bloque la\n");}
+  | 
   ;
 
 print:
-    PRINTINT '(' '$' ID '$' ')'
-  | PRINTTEXT '(' '$'  STR  '$' ')'
+     PRINTINT '(' '$' ID '$' ')' {
+         struct symbol * id=symtable_get(table,$4);
+      if(id==NULL)
+         {
+        fprintf(stderr, "line %d: semantic error \n", yylineno);
+        exit(3);
+      
+        }
+      gencode(code,CALL_PRINT,id,NULL,NULL);
+}
+  | PRINTTEXT '(' '$'  STR  '$' ')'   {
+      mips_print(output, $4, table);
+      char name[10];
+      sprintf(name, "print%d", table->print-1);
+      symtable_put(table, name);
+      struct symbol * id = symtable_get(table,name);
+      gencode(code,CALL_TEXT,id,NULL,NULL);
+}
   |
   ;
   
 //TODO rajouter les instructions
 expression:
     sous_expression
-  | sous_expression PLUS expression
-  | sous_expression MIN expression
-  | sous_expression MULTOP expression 
+  | sous_expression PLUS expression {
+         $$.ptr = newtemp(table);
+         gencode(code,BOP_PLUS,$$.ptr,$1.ptr,$3.ptr); }
+  | sous_expression MIN expression  {
+         $$.ptr = newtemp(table);
+         gencode(code,BOP_MINUS,$$.ptr,$1.ptr,$3.ptr); }
+  | sous_expression MULTOP expression {
+         $$.ptr = newtemp(table);
+         gencode(code,BOP_MULT,$$.ptr,$1.ptr,$3.ptr); }
   ;
 
 //TODO rajouter les instructions
 sous_expression:
-    INT 
-  | BOOL
-  | REAL
-  | ID
+   INT  {
+        $$.ptr = symtable_const(table, $1);
+}
+  | BOOL  {
+        $$.ptr = symtable_const(table, $1);
+}
+  | REAL  {
+        $$.ptr = symtable_const(table, $1);
+}
+  | ID  {
+     struct symbol * id = symtable_get(table,$1);
+      if (id==NULL)
+      {
+        fprintf(stderr, "line %d: semantic error \n", yylineno);
+        exit(3);
+      
+      }
+      $$.ptr = id;
+}
   ;
 
 initialisation:
@@ -99,9 +148,19 @@ list_const:
   | const
   ;
   
-//TODO rajouter les instructions d'ajout dans la table des symboles
+//TODO rajouter les instructions d'ajout dans la table des symboles #Done !
 const:
-    ID '=' INT CIN type
+    ID '=' INT CIN type {
+        struct symbol * id = symtable_get(table,$1);
+        if(id==NULL){
+            id=symtable_put(table,$1);
+            mips_int_const(output,$1,$3);
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
   ;
 
 inputs:
@@ -115,9 +174,19 @@ list_input:
   | input
   ;
   
-//TODO rajouter les instructions d'ajjout ans la table des symboles
+//TODO rajouter les instructions d'ajout ans la table des symboles #Done
 input:
-    ID CIN type 
+     ID CIN type {
+        struct symbol * id = symtable_get(table,$1);
+        if(id==NULL){
+            id=symtable_put(table,$1);
+            mips_int(output,$1);
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+}
   ;
 
 outputs:
@@ -134,6 +203,16 @@ list_output:
 //TODO rajouter les instructions
 output:
     ID CIN type 
+        {struct symbol * id = symtable_get(table,$1);
+        if(id==NULL){
+            id=symtable_put(table,$1);
+            mips_int(output,$1);
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
   ;
 
 globales:
@@ -150,6 +229,16 @@ list_global:
 //TODO rajouter les instructions
 global:
     ID CIN type 
+        {struct symbol * id = symtable_get(table,$1);
+        if(id==NULL){
+            id=symtable_put(table,$1);
+            mips_int(output,$1);
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
   ;
 
 locales:
@@ -166,6 +255,16 @@ list_local:
 //TODO rajouter les instructions
 local:
     ID CIN type 
+        {struct symbol * id = symtable_get(table,$1);
+        if(id==NULL){
+            id=symtable_put(table,$1);
+            mips_int(output,$1);
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
   ;
 
 type:
@@ -205,13 +304,13 @@ int main(int argc, char* argv[]) {
   table=symtable_new();
 
   fprintf(output, ".data\n");
-  fprintf(output, "\tmsg: .asciiz \"\\n\" \n");
+  fprintf(output, " print: .asciiz \"\\n\" \n");
   yyparse();
   fclose(yyin);
   fprintf(output, ".text\n");
   fprintf(output, "main:\n");
-  fprintf(output, "\tli $v0, 10\n");
-  fprintf(output, "\tsyscall\n");
+  fprintf(output, " li $v0, 10\n");
+  fprintf(output, " syscall\n");
   texcc_lexer_free();
   return EXIT_SUCCESS;
 }

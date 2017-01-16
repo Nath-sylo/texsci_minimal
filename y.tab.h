@@ -107,9 +107,12 @@ typedef union YYSTYPE
   char* name;
   char* val;
   char* str;
+  struct {
+      struct symbol * ptr;
+  } exprval;
 }
 /* Line 1529 of yacc.c.  */
-#line 113 "y.tab.h"
+#line 116 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

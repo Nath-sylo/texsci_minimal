@@ -173,9 +173,12 @@ typedef union YYSTYPE
   char* name;
   char* val;
   char* str;
+  struct {
+      struct symbol * ptr;
+  } exprval;
 }
 /* Line 193 of yacc.c.  */
-#line 179 "y.tab.c"
+#line 182 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -188,7 +191,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 192 "y.tab.c"
+#line 195 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -496,14 +499,14 @@ static const yytype_int8 yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    42,    42,    43,    47,    55,    56,    60,    61,    62,
-      66,    67,    68,    73,    74,    75,    76,    81,    82,    83,
-      84,    88,    92,    93,    94,    98,    99,   104,   108,   109,
-     110,   114,   115,   120,   124,   125,   126,   130,   131,   136,
-     140,   141,   142,   146,   147,   152,   156,   157,   158,   162,
-     163,   168,   172,   173,   174
+       0,    47,    47,    48,    52,    60,    61,    65,    73,    74,
+      78,    88,    96,   101,   102,   105,   108,   115,   118,   121,
+     124,   137,   141,   142,   143,   147,   148,   153,   167,   168,
+     169,   173,   174,   179,   193,   194,   195,   199,   200,   205,
+     219,   220,   221,   225,   226,   231,   245,   246,   247,   251,
+     252,   257,   271,   272,   273
 };
 #endif
 
@@ -1488,71 +1491,232 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 48 "texcc.y"
+#line 53 "texcc.y"
     {
       fprintf(stderr, "[texcc] info: algorithm \"%s\" parsed\n", (yyvsp[(3) - (8)].name));
       free((yyvsp[(3) - (8)].name));
     }
     break;
 
-  case 9:
-#line 62 "texcc.y"
-    {printf("je bloque la\n");}
+  case 7:
+#line 65 "texcc.y"
+    {
+            struct symbol  * id = symtable_get(table,(yyvsp[(2) - (6)].name));
+            if(id==NULL){
+                fprintf(stderr, "line %d: semantic error \n", yylineno);
+                exit(3);
+            }
+            gencode(code,COPY,id,(yyvsp[(4) - (6)].exprval).ptr,NULL);
+    }
+    break;
+
+  case 10:
+#line 78 "texcc.y"
+    {
+         struct symbol * id=symtable_get(table,(yyvsp[(4) - (6)].name));
+      if(id==NULL)
+         {
+        fprintf(stderr, "line %d: semantic error \n", yylineno);
+        exit(3);
+      
+        }
+      gencode(code,CALL_PRINT,id,NULL,NULL);
+}
+    break;
+
+  case 11:
+#line 88 "texcc.y"
+    {
+      mips_print(output, (yyvsp[(4) - (6)].str), table);
+      char name[10];
+      sprintf(name, "print%d", table->print-1);
+      symtable_put(table, name);
+      struct symbol * id = symtable_get(table,name);
+      gencode(code,CALL_TEXT,id,NULL,NULL);
+}
+    break;
+
+  case 14:
+#line 102 "texcc.y"
+    {
+         (yyval.exprval).ptr = newtemp(table);
+         gencode(code,BOP_PLUS,(yyval.exprval).ptr,(yyvsp[(1) - (3)].exprval).ptr,(yyvsp[(3) - (3)].exprval).ptr); }
+    break;
+
+  case 15:
+#line 105 "texcc.y"
+    {
+         (yyval.exprval).ptr = newtemp(table);
+         gencode(code,BOP_MINUS,(yyval.exprval).ptr,(yyvsp[(1) - (3)].exprval).ptr,(yyvsp[(3) - (3)].exprval).ptr); }
+    break;
+
+  case 16:
+#line 108 "texcc.y"
+    {
+         (yyval.exprval).ptr = newtemp(table);
+         gencode(code,BOP_MULT,(yyval.exprval).ptr,(yyvsp[(1) - (3)].exprval).ptr,(yyvsp[(3) - (3)].exprval).ptr); }
+    break;
+
+  case 17:
+#line 115 "texcc.y"
+    {
+        (yyval.exprval).ptr = symtable_const(table, (yyvsp[(1) - (1)].val));
+}
+    break;
+
+  case 18:
+#line 118 "texcc.y"
+    {
+        (yyval.exprval).ptr = symtable_const(table, (yyvsp[(1) - (1)].val));
+}
+    break;
+
+  case 19:
+#line 121 "texcc.y"
+    {
+        (yyval.exprval).ptr = symtable_const(table, (yyvsp[(1) - (1)].val));
+}
+    break;
+
+  case 20:
+#line 124 "texcc.y"
+    {
+     struct symbol * id = symtable_get(table,(yyvsp[(1) - (1)].name));
+      if (id==NULL)
+      {
+        fprintf(stderr, "line %d: semantic error \n", yylineno);
+        exit(3);
+      
+      }
+      (yyval.exprval).ptr = id;
+}
     break;
 
   case 23:
-#line 93 "texcc.y"
+#line 142 "texcc.y"
     {printf("Pas de constante trouve\n");}
     break;
 
   case 24:
-#line 94 "texcc.y"
+#line 143 "texcc.y"
     {printf("Pas de constante trouve\n");}
     break;
 
+  case 27:
+#line 153 "texcc.y"
+    {
+        struct symbol * id = symtable_get(table,(yyvsp[(1) - (5)].name));
+        if(id==NULL){
+            id=symtable_put(table,(yyvsp[(1) - (5)].name));
+            mips_int_const(output,(yyvsp[(1) - (5)].name),(yyvsp[(3) - (5)].val));
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
+    break;
+
   case 29:
-#line 109 "texcc.y"
+#line 168 "texcc.y"
     {printf("Pas d'input trouve\n");}
     break;
 
   case 30:
-#line 110 "texcc.y"
+#line 169 "texcc.y"
     {printf("Pas d'input trouve\n");}
     break;
 
+  case 33:
+#line 179 "texcc.y"
+    {
+        struct symbol * id = symtable_get(table,(yyvsp[(1) - (3)].name));
+        if(id==NULL){
+            id=symtable_put(table,(yyvsp[(1) - (3)].name));
+            mips_int(output,(yyvsp[(1) - (3)].name));
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+}
+    break;
+
   case 35:
-#line 125 "texcc.y"
+#line 194 "texcc.y"
     {printf("Pas d'output trouve\n");}
     break;
 
   case 36:
-#line 126 "texcc.y"
+#line 195 "texcc.y"
     {printf("Pas d'output trouve\n");}
     break;
 
+  case 39:
+#line 206 "texcc.y"
+    {struct symbol * id = symtable_get(table,(yyvsp[(1) - (3)].name));
+        if(id==NULL){
+            id=symtable_put(table,(yyvsp[(1) - (3)].name));
+            mips_int(output,(yyvsp[(1) - (3)].name));
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
+    break;
+
   case 41:
-#line 141 "texcc.y"
+#line 220 "texcc.y"
     {printf("Pas de variable globale trouve\n");}
     break;
 
   case 42:
-#line 142 "texcc.y"
+#line 221 "texcc.y"
     {printf("Pas de variable globale trouve\n");}
     break;
 
+  case 45:
+#line 232 "texcc.y"
+    {struct symbol * id = symtable_get(table,(yyvsp[(1) - (3)].name));
+        if(id==NULL){
+            id=symtable_put(table,(yyvsp[(1) - (3)].name));
+            mips_int(output,(yyvsp[(1) - (3)].name));
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
+    break;
+
   case 47:
-#line 157 "texcc.y"
+#line 246 "texcc.y"
     {printf("Pas de variable locale trouve\n");}
     break;
 
   case 48:
-#line 158 "texcc.y"
+#line 247 "texcc.y"
     {printf("Pas de variable locale trouve\n");}
+    break;
+
+  case 51:
+#line 258 "texcc.y"
+    {struct symbol * id = symtable_get(table,(yyvsp[(1) - (3)].name));
+        if(id==NULL){
+            id=symtable_put(table,(yyvsp[(1) - (3)].name));
+            mips_int(output,(yyvsp[(1) - (3)].name));
+        }
+        else {
+            fprintf(stderr, "line %d: semantic error \n", yylineno);
+            exit(3);
+        }
+  }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1556 "y.tab.c"
+#line 1720 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1766,7 +1930,7 @@ yyreturn:
 }
 
 
-#line 177 "texcc.y"
+#line 276 "texcc.y"
 
 
 void yyerror(const char * s)
@@ -1798,13 +1962,13 @@ int main(int argc, char* argv[]) {
   table=symtable_new();
 
   fprintf(output, ".data\n");
-  fprintf(output, "\tmsg: .asciiz \"\\n\" \n");
+  fprintf(output, " print: .asciiz \"\\n\" \n");
   yyparse();
   fclose(yyin);
   fprintf(output, ".text\n");
   fprintf(output, "main:\n");
-  fprintf(output, "\tli $v0, 10\n");
-  fprintf(output, "\tsyscall\n");
+  fprintf(output, " li $v0, 10\n");
+  fprintf(output, " syscall\n");
   texcc_lexer_free();
   return EXIT_SUCCESS;
 }

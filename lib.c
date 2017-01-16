@@ -330,3 +330,14 @@ void print_code(FILE * output, struct code * code){
         print_quad(output, &code->quads[i]);
     }
 }
+
+void mips_print(FILE* output, char* str, struct symtable * table){
+    fprintf(output," print%d: .asciiz %s \n", table->print, str);
+    ++ (table->print);
+}
+void mips_int(FILE* output,char* str){
+        fprintf(output, " %s: .word 0\n", str);
+}
+void mips_int_const(FILE* output,char* str, char* value){
+        fprintf(output, " %s: .word %s\n", str, value);
+}
