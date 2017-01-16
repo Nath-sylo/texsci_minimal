@@ -268,9 +268,9 @@ local:
   ;
 
 type:
-    INT
+    INTEGER
   | REAL
-  | BOOL
+  | BOOLEAN
   ;
 
 %%
