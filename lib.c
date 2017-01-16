@@ -251,14 +251,11 @@ void print_quad(FILE * output, struct quad * quadre){
             if ((s2[0] != '$') && (s3[0] != '$')){
                 fprintf(output, "add %s, $t0, $t1\n", s1);
             }
-            if((s2[0]=='$') || (s3[0]=='$')){
-                if(s3[0]!='$') fprintf(output, "add %s, %s, $t1\n",s1,s2);
-                else if(s2[0]!='$') fprintf(output, "add %s, $t2, %s\n",s1,s3);
-                else fprintf(output, "add %s, %s, %s\n",s1,s2,s3);
-            }
             else{
-                fprintf(stderr, "[texcc] error: \n");
-                exit(4);
+                if ((s2[0]=='$') && (s3[0]=='$')) fprintf(output, "add %s, %s, %s\n",s1,s2,s3);
+                else if(s3[0]=='$') fprintf(output, "add %s, %s, $t1\n",s1,s2);
+                else if(s2[0]=='$') fprintf(output, "add %s, $t2, %s\n",s1,s3);
+                
             }
             break;
         case BOP_MINUS:
@@ -299,11 +296,11 @@ void print_quad(FILE * output, struct quad * quadre){
             break;
         case CALL_PRINT:
             s1=print_symbol(quadre->sym1);
-            fprintf(output, "\t\tli $v0, 4\n");
-            fprintf(output, "\t\tla $a0, %s\n", s1);
+            fprintf(output, "\t\tli $v0, 1\n");
+            fprintf(output, "\t\tlw $a0, %s\n", s1);
             fprintf(output, "\t\tsyscall\n");
 
-            fprintf(output, "\t\tli $v0, 1\n");
+            fprintf(output, "\t\tli $v0, 4\n");
             fprintf(output, "\t\tla $a0, print\n");
             fprintf(output, "\t\tsyscall\n");
             break;
@@ -315,6 +312,12 @@ void print_quad(FILE * output, struct quad * quadre){
             break;
         case COPY:
             s1=print_symbol(quadre->sym1);
+            s2=print_symbol(quadre->sym2);
+            if (s2[0] == '$') fprintf(output, "\t\t sw %s, %s\n",s2, s1);
+            else {
+                fprintf(output, "\t\tli $t0, %s\n",s2);
+                fprintf(output, "\t\tsw $t0, %s\n",s1);
+            }
             break;
         default:
             printf("BUG\n");
