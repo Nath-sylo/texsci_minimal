@@ -288,11 +288,36 @@ void print_quad(FILE * output, struct quad * quadre){
             s1=print_symbol(quadre->sym1);
             s2=print_symbol(quadre->sym2);
             s3=print_symbol(quadre->sym3);
+            if(quadre->sym2->kind == CONSTANT){
+                fprintf(output, "\t\tli $t0, %s\n", s2);
+            }
+            else if (s2[0] != '$'){
+                fprintf(output, "\t\tlw $t0, %s\n", s2);
+            }
+            if(quadre->sym3->kind == CONSTANT){
+                fprintf(output, "\t\tli $t1, %s\n", s3);
+            }
+            else if (s3[0] != '$'){
+                fprintf(output, "\t\tlw $t1, %s\n", s3);
+            }
+
+            if ((s2[0] != '$') && (s3[0] != '$')){
+                fprintf(output, "mult %s, $t0, $t1\n", s1);
+            }
+            else{
+                if ((s2[0]=='$') && (s3[0]=='$')) fprintf(output, "mult %s, %s\n",s2,s3);
+                else if(s3[0]=='$') fprintf(output, "mult %s, $t1\n",s2);
+                else if(s2[0]=='$') fprintf(output, "mult $t0, %s\n",s3);
+            }
+            if(s1[0]=='$') fprintf(output, "\t\tmflo %s\n",s1);
+            else{
+                fprintf(output, "\t\tmflo $t0\n");
+                fprintf(output, "\t\tsw $t0 %s\n",s1);
+            }
             break;
         case UOP_MINUS:
             s1=print_symbol(quadre->sym1);
-            s2=print_symbol(quadre->sym2);
-            s3=print_symbol(quadre->sym3);
+            printf("[texcc] info: negative numbers found\n");
             break;
         case CALL_PRINT:
             s1=print_symbol(quadre->sym1);

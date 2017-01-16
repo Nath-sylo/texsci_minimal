@@ -108,6 +108,8 @@ expression:
   | sous_expression MULTOP expression {
          $$.ptr = newtemp(table);
          gencode(code,BOP_MULT,$$.ptr,$1.ptr,$3.ptr); }
+  | MIN expression  {$$.ptr = newtemp(table);
+         gencode(code,UOP_MINUS,$$.ptr,$2.ptr,NULL);}
   ;
 
 //TODO rajouter les instructions
