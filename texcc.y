@@ -2,13 +2,16 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
+  #include "lib.h"
   #define TEXCC_ERROR_GENERAL 4
-
   void yyerror(const char*);
 
   // Functions and global variables provided by Lex.
   int yylex();
   void texcc_lexer_free();
+  FILE* output;
+  struct code * code;
+  struct symtable * table;
   extern FILE* yyin;
   extern int yylineno;
 
@@ -189,13 +192,26 @@ int main(int argc, char* argv[]) {
       fprintf(stderr, "[texcc] error: unable to open file %s\n", argv[1]);
       exit(TEXCC_ERROR_GENERAL);
     }
+    if ((output = fopen("output.s","w")) == NULL) {
+        fprintf(stderr, "[texcc] error: unable to open output file\n");
+        exit(TEXCC_ERROR_GENERAL);
+    }
   } else {
     fprintf(stderr, "[texcc] usage: %s input_file\n", argv[0]);
     exit(TEXCC_ERROR_GENERAL);
   }
 
+  code=code_new();
+  table=symtable_new();
+
+  fprintf(output, ".data\n");
+  fprintf(output, " msg: .asciiz \"\\n\" \n");
   yyparse();
   fclose(yyin);
+  fprintf(output, ".text\n");
+  fprintf(output, "main:\n");
+  fprintf(output, " li $v0, 10\n");
+  fprintf(output, " syscall\n");
   texcc_lexer_free();
   return EXIT_SUCCESS;
 }

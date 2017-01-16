@@ -26,7 +26,7 @@ static void symtable_grow(struct symtable * t)
     }
 }
 
-struct symbol * symtable_const(struct symtable * t, long int v) 
+struct symbol * symtable_const(struct symtable * t, char * v) 
 {
     unsigned int i;
     for ( i=0 ; i<t->size && t->symbols[i].u.value != v; i++ );
@@ -72,7 +72,7 @@ void symtable_dump(struct symtable * t)
     for ( i=0 ; i<t->size; i++ )
     {
       if(t->symbols[i].kind==CONSTANT)
-        printf("       %p = %ld\n",&(t->symbols[i]),t->symbols[i].u.value);
+        printf("       %p = %s\n",&(t->symbols[i]),t->symbols[i].u.value);
       if(t->symbols[i].kind==NAME)
         printf("       %p = %s\n",&(t->symbols[i]),t->symbols[i].u.name);
     }
@@ -139,7 +139,7 @@ static void symbol_dump(struct symbol * s)
             printf("%s",s->u.name);
             break;
         case CONSTANT:
-            printf("%ld",s->u.value);
+            printf("%s",s->u.value);
             break;
         default:
             break;
@@ -264,33 +264,5 @@ void print_quad(FILE * output, struct quad * quadre){
             printf("BUG\n");
             break;
     }
-
-}
-
-void print_code(FILE * output, struct code * cod){
-
-
-
-}
-
-void case_print(FILE * output, char * str, struct symtable * table){
-
-
-
-
-}
-
-void case_const(FILE * output, char * str, char * val){
-
-
-
-
-
-}
-
-void case_id(FILE * output, char * str){
-
-
-
 
 }

@@ -20,7 +20,7 @@ struct symtable {
 
 struct symtable * symtable_new();
 
-struct symbol * symtable_const(struct symtable * t, long int v);
+struct symbol * symtable_const(struct symtable * t, char * v);
 
 struct symbol * symtable_get(struct symtable * t, const char * s);
 
@@ -63,11 +63,3 @@ void code_free(struct code * c);
 char* print_symbol(struct symbol * sym);
 
 void print_quad(FILE * output, struct quad * quadre);
-
-void print_code(FILE * output, struct code * cod);
-
-void case_print(FILE * output, char * str, struct symtable * table);
-
-void case_const(FILE * output, char * str, char * val);
-
-void case_id(FILE * output, char * str);

@@ -133,13 +133,16 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
+  #include "lib.h"
   #define TEXCC_ERROR_GENERAL 4
-
   void yyerror(const char*);
 
   // Functions and global variables provided by Lex.
   int yylex();
   void texcc_lexer_free();
+  FILE* output;
+  struct code * code;
+  struct symtable * table;
   extern FILE* yyin;
   extern int yylineno;
 
@@ -165,14 +168,14 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 17 "texcc.y"
+#line 20 "texcc.y"
 {
   char* name;
   char* val;
   char* str;
 }
 /* Line 193 of yacc.c.  */
-#line 176 "y.tab.c"
+#line 179 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -185,7 +188,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 189 "y.tab.c"
+#line 192 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -495,12 +498,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    39,    39,    40,    44,    52,    53,    57,    58,    59,
-      63,    64,    65,    70,    71,    72,    73,    78,    79,    80,
-      81,    85,    89,    90,    91,    95,    96,   101,   105,   106,
-     107,   111,   112,   117,   121,   122,   123,   127,   128,   133,
-     137,   138,   139,   143,   144,   149,   153,   154,   155,   159,
-     160,   165,   169,   170,   171
+       0,    42,    42,    43,    47,    55,    56,    60,    61,    62,
+      66,    67,    68,    73,    74,    75,    76,    81,    82,    83,
+      84,    88,    92,    93,    94,    98,    99,   104,   108,   109,
+     110,   114,   115,   120,   124,   125,   126,   130,   131,   136,
+     140,   141,   142,   146,   147,   152,   156,   157,   158,   162,
+     163,   168,   172,   173,   174
 };
 #endif
 
@@ -1485,7 +1488,7 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 45 "texcc.y"
+#line 48 "texcc.y"
     {
       fprintf(stderr, "[texcc] info: algorithm \"%s\" parsed\n", (yyvsp[(3) - (8)].name));
       free((yyvsp[(3) - (8)].name));
@@ -1493,63 +1496,63 @@ yyreduce:
     break;
 
   case 9:
-#line 59 "texcc.y"
+#line 62 "texcc.y"
     {printf("je bloque la\n");}
     break;
 
   case 23:
-#line 90 "texcc.y"
+#line 93 "texcc.y"
     {printf("Pas de constante trouve\n");}
     break;
 
   case 24:
-#line 91 "texcc.y"
+#line 94 "texcc.y"
     {printf("Pas de constante trouve\n");}
     break;
 
   case 29:
-#line 106 "texcc.y"
+#line 109 "texcc.y"
     {printf("Pas d'input trouve\n");}
     break;
 
   case 30:
-#line 107 "texcc.y"
+#line 110 "texcc.y"
     {printf("Pas d'input trouve\n");}
     break;
 
   case 35:
-#line 122 "texcc.y"
+#line 125 "texcc.y"
     {printf("Pas d'output trouve\n");}
     break;
 
   case 36:
-#line 123 "texcc.y"
+#line 126 "texcc.y"
     {printf("Pas d'output trouve\n");}
     break;
 
   case 41:
-#line 138 "texcc.y"
+#line 141 "texcc.y"
     {printf("Pas de variable globale trouve\n");}
     break;
 
   case 42:
-#line 139 "texcc.y"
+#line 142 "texcc.y"
     {printf("Pas de variable globale trouve\n");}
     break;
 
   case 47:
-#line 154 "texcc.y"
+#line 157 "texcc.y"
     {printf("Pas de variable locale trouve\n");}
     break;
 
   case 48:
-#line 155 "texcc.y"
+#line 158 "texcc.y"
     {printf("Pas de variable locale trouve\n");}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1553 "y.tab.c"
+#line 1556 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1763,7 +1766,7 @@ yyreturn:
 }
 
 
-#line 174 "texcc.y"
+#line 177 "texcc.y"
 
 
 void yyerror(const char * s)
@@ -1782,13 +1785,26 @@ int main(int argc, char* argv[]) {
       fprintf(stderr, "[texcc] error: unable to open file %s\n", argv[1]);
       exit(TEXCC_ERROR_GENERAL);
     }
+    if ((output = fopen("output.s","w")) == NULL) {
+        fprintf(stderr, "[texcc] error: unable to open output file\n");
+        exit(TEXCC_ERROR_GENERAL);
+    }
   } else {
     fprintf(stderr, "[texcc] usage: %s input_file\n", argv[0]);
     exit(TEXCC_ERROR_GENERAL);
   }
 
+  code=code_new();
+  table=symtable_new();
+
+  fprintf(output, ".data\n");
+  fprintf(output, " msg: .asciiz \"\\n\" \n");
   yyparse();
   fclose(yyin);
+  fprintf(output, ".text\n");
+  fprintf(output, "main:\n");
+  fprintf(output, " li $v0, 10\n");
+  fprintf(output, " syscall\n");
   texcc_lexer_free();
   return EXIT_SUCCESS;
 }
