@@ -235,11 +235,57 @@ void print_quad(FILE * output, struct quad * quadre){
             s1=print_symbol(quadre->sym1);
             s2=print_symbol(quadre->sym2);
             s3=print_symbol(quadre->sym3);
+            if(quadre->sym2->kind == CONSTANT){
+                fprintf(output, "\t\tli $t0, %s\n", s2);
+            }
+            else if (s2[0] != '$'){
+                fprintf(output, "\t\tlw $t0, %s\n", s2);
+            }
+            if(quadre->sym3->kind == CONSTANT){
+                fprintf(output, "\t\tli $t1, %s\n", s3);
+            }
+            else if (s3[0] != '$'){
+                fprintf(output, "\t\tlw $t1, %s\n", s3);
+            }
+
+            if ((s2[0] != '$') && (s3[0] != '$')){
+                fprintf(output, "add %s, $t0, $t1\n", s1);
+            }
+            if((s2[0]=='$') || (s3[0]=='$')){
+                if(s3[0]!='$') fprintf(output, "add %s, %s, $t1\n",s1,s2);
+                else if(s2[0]!='$') fprintf(output, "add %s, $t2, %s\n",s1,s3);
+                else fprintf(output, "add %s, %s, %s\n",s1,s2,s3);
+            }
+            else{
+                fprintf(stderr, "[texcc] error: \n");
+                exit(4);
+            }
             break;
         case BOP_MINUS:
             s1=print_symbol(quadre->sym1);
             s2=print_symbol(quadre->sym2);
             s3=print_symbol(quadre->sym3);
+            if(quadre->sym2->kind == CONSTANT){
+                fprintf(output, "\t\tli $t0, %s\n", s2);
+            }
+            else if (s2[0] != '$'){
+                fprintf(output, "\t\tlw $t0, %s\n", s2);
+            }
+            if(quadre->sym3->kind == CONSTANT){
+                fprintf(output, "\t\tli $t1, %s\n", s3);
+            }
+            else if (s3[0] != '$'){
+                fprintf(output, "\t\tlw $t1, %s\n", s3);
+            }
+
+            if ((s2[0] != '$') && (s3[0] != '$')){
+                fprintf(output, "sub %s, $t0, $t1\n", s1);
+            }
+            if((s2[0]=='$') || (s3[0]=='$')){
+                if(s3[0]!='$') fprintf(output, "sub %s, %s, $t1\n",s1,s2);
+                else if(s2[0]!='$') fprintf(output, "sub %s, $t2, %s\n",s1,s3);
+                else fprintf(output, "sub %s, %s, %s\n",s1,s2,s3);
+            }
             break;
         case BOP_MULT:
             s1=print_symbol(quadre->sym1);
@@ -252,17 +298,35 @@ void print_quad(FILE * output, struct quad * quadre){
             s3=print_symbol(quadre->sym3);
             break;
         case CALL_PRINT:
-            printf("print ");
-            symbol_dump(quadre->sym1);
+            s1=print_symbol(quadre->sym1);
+            fprintf(output, "\t\tli $v0, 4\n");
+            fprintf(output, "\t\tla $a0, %s\n", s1);
+            fprintf(output, "\t\tsyscall\n");
+
+            fprintf(output, "\t\tli $v0, 1\n");
+            fprintf(output, "\t\tla $a0, print\n");
+            fprintf(output, "\t\tsyscall\n");
+            break;
+        case CALL_TEXT:
+            s1=print_symbol(quadre->sym1);
+            fprintf(output, "\t\tli $v0, 4\n");
+            fprintf(output, "\t\tla $a0, %s\n", s1);
+            fprintf(output, "\t\tsyscall\n");
             break;
         case COPY:
-            symbol_dump(quadre->sym1);
-            printf(" := ");
-            symbol_dump(quadre->sym2);
+            s1=print_symbol(quadre->sym1);
             break;
         default:
             printf("BUG\n");
             break;
     }
 
+}
+
+void print_code(FILE * output, struct code * code){
+
+    int i;
+    for (i=0; i < code->nextquad; i++){
+        print_quad(output, &code->quads[i]);
+    }
 }

@@ -63,3 +63,5 @@ void code_free(struct code * c);
 char* print_symbol(struct symbol * sym);
 
 void print_quad(FILE * output, struct quad * quadre);
+
+void print_code(FILE * output, struct code * code);

@@ -205,13 +205,13 @@ int main(int argc, char* argv[]) {
   table=symtable_new();
 
   fprintf(output, ".data\n");
-  fprintf(output, " msg: .asciiz \"\\n\" \n");
+  fprintf(output, "\tmsg: .asciiz \"\\n\" \n");
   yyparse();
   fclose(yyin);
   fprintf(output, ".text\n");
   fprintf(output, "main:\n");
-  fprintf(output, " li $v0, 10\n");
-  fprintf(output, " syscall\n");
+  fprintf(output, "\tli $v0, 10\n");
+  fprintf(output, "\tsyscall\n");
   texcc_lexer_free();
   return EXIT_SUCCESS;
 }
