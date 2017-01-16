@@ -124,7 +124,7 @@ void gencode(struct code * c,
 struct symbol *newtemp(struct symtable * t)
 {
   struct symbol * s;
-  char* name;
+  char* name = malloc(32*sizeof(char));
   sprintf(name,"t%d",t->temporary);
   s = symtable_put(t,name);
   ++ (t->temporary);
