@@ -1967,6 +1967,7 @@ int main(int argc, char* argv[]) {
   fclose(yyin);
   fprintf(output, ".text\n");
   fprintf(output, "main:\n");
+  print_code(output,code);
   fprintf(output, " li $v0, 10\n");
   fprintf(output, " syscall\n");
   texcc_lexer_free();

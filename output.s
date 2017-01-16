@@ -1,9 +1,10 @@
 .data
  print: .asciiz "\n" 
- a: .word 0
- b: .word 0
- c: .word 0
+ print0: .asciiz main 
 .text
 main:
+		li $v0, 4
+		la $a0, print0
+		syscall
  li $v0, 10
  syscall
